@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import Sidebar from "@/components/Sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,19 +7,10 @@ export const metadata: Metadata = {
   description: siteConfig.description,
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className="antialiased">
-        <Sidebar />
-        <div className="ml-64 min-h-screen">
-          {children}
-        </div>
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
