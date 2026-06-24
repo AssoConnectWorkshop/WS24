@@ -10,10 +10,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Description requise" }, { status: 400 });
   }
 
-  const stream = await client.messages.create({
+  const message = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 1024,
-    stream: true,
     messages: [
       {
         role: "user",
@@ -27,8 +26,6 @@ Réponds en français, de façon structurée et créative.`,
       },
     ],
   });
-
-  const message = await stream.finalMessage();
 
   const textContent = message.content.find((b) => b.type === "text");
   const text = textContent?.type === "text" ? textContent.text : "";
