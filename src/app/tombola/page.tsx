@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Link from "next/link";
 
 interface Prize {
   id: string;
@@ -57,15 +56,12 @@ export default function Tombola() {
   async function draw() {
     if (participants.length === 0 || prizes.length === 0) return;
     setDrawing(true);
-
     await new Promise((r) => setTimeout(r, 800));
-
     const shuffled = [...participants].sort(() => Math.random() - 0.5);
     const results: Winner[] = prizes.map((prize, i) => ({
       prize,
       participant: shuffled[i % shuffled.length],
     }));
-
     setWinners(results);
     setPhase("results");
     setDrawing(false);
@@ -79,157 +75,156 @@ export default function Tombola() {
   const canDraw = participants.length > 0 && prizes.length > 0;
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-8 pt-16">
-      <div className="w-full max-w-2xl flex flex-col gap-8">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">
-            ← Accueil
-          </Link>
-        </div>
+    <main className="p-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">🏟 Tombola</h1>
+        <p className="text-gray-500 text-sm mt-1">Ajoutez les participants et les lots, puis lancez le tirage au sort.</p>
+      </div>
 
-        <div>
-          <h1 className="text-3xl font-bold">🏟 Tombola</h1>
-          <p className="text-gray-500 mt-2">
-            Ajoutez les participants et les lots, puis lancez le tirage au sort.
-          </p>
-        </div>
-
-        {phase === "setup" && (
-          <>
-            <div className="border rounded-xl p-6 flex flex-col gap-4">
-              <h2 className="font-semibold">Participants</h2>
-              <form onSubmit={addParticipant} className="flex gap-2">
-                <input
-                  ref={participantRef}
-                  value={participantInput}
-                  onChange={(e) => setParticipantInput(e.target.value)}
-                  placeholder="Nom du participant"
-                  className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                />
-                <button
-                  type="submit"
-                  disabled={!participantInput.trim()}
-                  className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-gray-800 transition-colors"
-                >
-                  Ajouter
-                </button>
-              </form>
-              {participants.length === 0 ? (
-                <p className="text-sm text-gray-400">Aucun participant pour l&apos;instant.</p>
-              ) : (
-                <ul className="flex flex-col gap-1">
-                  {participants.map((p) => (
-                    <li key={p} className="flex items-center justify-between text-sm py-1 border-b last:border-0">
-                      <span>{p}</span>
-                      <button
-                        onClick={() => removeParticipant(p)}
-                        className="text-gray-400 hover:text-red-500 transition-colors text-xs"
-                      >
-                        Retirer
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+      {phase === "setup" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-gray-900">Participants</h2>
               {participants.length > 0 && (
-                <p className="text-xs text-gray-400">{participants.length} participant{participants.length > 1 ? "s" : ""}</p>
-              )}
-            </div>
-
-            <div className="border rounded-xl p-6 flex flex-col gap-4">
-              <h2 className="font-semibold">Lots</h2>
-              <form onSubmit={addPrize} className="flex gap-2">
-                <input
-                  ref={prizeRef}
-                  value={prizeInput}
-                  onChange={(e) => setPrizeInput(e.target.value)}
-                  placeholder="Description du lot"
-                  className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                />
-                <button
-                  type="submit"
-                  disabled={!prizeInput.trim()}
-                  className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-gray-800 transition-colors"
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "#eef1fd", color: "#2d4de0" }}
                 >
-                  Ajouter
-                </button>
-              </form>
-              {prizes.length === 0 ? (
-                <p className="text-sm text-gray-400">Aucun lot pour l&apos;instant.</p>
-              ) : (
-                <ul className="flex flex-col gap-1">
-                  {prizes.map((prize, i) => (
-                    <li key={prize.id} className="flex items-center justify-between text-sm py-1 border-b last:border-0">
-                      <span>
-                        <span className="text-gray-400 mr-2">#{i + 1}</span>
-                        {prize.label}
-                      </span>
-                      <button
-                        onClick={() => removePrize(prize.id)}
-                        className="text-gray-400 hover:text-red-500 transition-colors text-xs"
-                      >
-                        Retirer
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {prizes.length > 0 && (
-                <p className="text-xs text-gray-400">{prizes.length} lot{prizes.length > 1 ? "s" : ""}</p>
+                  {participants.length}
+                </span>
               )}
             </div>
-
-            <button
-              onClick={draw}
-              disabled={!canDraw || drawing}
-              className="w-full bg-black text-white py-3 rounded-xl font-semibold text-base disabled:opacity-40 hover:bg-gray-800 transition-colors"
-            >
-              {drawing ? "Tirage en cours…" : "🎰 Lancer le tirage"}
-            </button>
-          </>
-        )}
-
-        {phase === "results" && (
-          <>
-            <div className="border rounded-xl p-6 flex flex-col gap-4">
-              <h2 className="font-semibold text-lg">🎉 Résultats du tirage</h2>
-              <ul className="flex flex-col gap-3">
-                {winners.map((w, i) => (
-                  <li
-                    key={w.prize.id}
-                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl"
-                  >
-                    <span className="text-2xl font-bold text-gray-300 w-8 text-center">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1">
-                      <p className="font-semibold">{w.participant}</p>
-                      <p className="text-sm text-gray-500">{w.prize.label}</p>
-                    </div>
-                    <span className="text-2xl">🏆</span>
+            <form onSubmit={addParticipant} className="flex gap-2">
+              <input
+                ref={participantRef}
+                value={participantInput}
+                onChange={(e) => setParticipantInput(e.target.value)}
+                placeholder="Nom du participant"
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
+              />
+              <button
+                type="submit"
+                disabled={!participantInput.trim()}
+                className="text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
+                style={{ backgroundColor: "#2d4de0" }}
+              >
+                +
+              </button>
+            </form>
+            {participants.length === 0 ? (
+              <p className="text-sm text-gray-400">Aucun participant.</p>
+            ) : (
+              <ul className="flex flex-col gap-1">
+                {participants.map((p) => (
+                  <li key={p} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50 last:border-0">
+                    <span className="text-gray-700">{p}</span>
+                    <button onClick={() => removeParticipant(p)} className="text-gray-300 hover:text-red-400 transition-colors text-xs">
+                      ✕
+                    </button>
                   </li>
                 ))}
               </ul>
-            </div>
+            )}
+          </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={draw}
-                disabled={drawing}
-                className="flex-1 border border-black text-black py-3 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors disabled:opacity-40"
-              >
-                Retirer au sort à nouveau
-              </button>
-              <button
-                onClick={reset}
-                className="flex-1 bg-black text-white py-3 rounded-xl font-semibold text-sm hover:bg-gray-800 transition-colors"
-              >
-                Nouvelle tombola
-              </button>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-gray-900">Lots</h2>
+              {prizes.length > 0 && (
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "#eef1fd", color: "#2d4de0" }}
+                >
+                  {prizes.length}
+                </span>
+              )}
             </div>
-          </>
-        )}
-      </div>
+            <form onSubmit={addPrize} className="flex gap-2">
+              <input
+                ref={prizeRef}
+                value={prizeInput}
+                onChange={(e) => setPrizeInput(e.target.value)}
+                placeholder="Description du lot"
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
+              />
+              <button
+                type="submit"
+                disabled={!prizeInput.trim()}
+                className="text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
+                style={{ backgroundColor: "#2d4de0" }}
+              >
+                +
+              </button>
+            </form>
+            {prizes.length === 0 ? (
+              <p className="text-sm text-gray-400">Aucun lot.</p>
+            ) : (
+              <ul className="flex flex-col gap-1">
+                {prizes.map((prize, i) => (
+                  <li key={prize.id} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50 last:border-0">
+                    <span className="text-gray-700">
+                      <span className="text-gray-300 mr-2">#{i + 1}</span>{prize.label}
+                    </span>
+                    <button onClick={() => removePrize(prize.id)} className="text-gray-300 hover:text-red-400 transition-colors text-xs">
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="md:col-span-2">
+            <button
+              onClick={draw}
+              disabled={!canDraw || drawing}
+              className="w-full text-white py-3 rounded-xl font-semibold text-base disabled:opacity-40 transition-colors"
+              style={{ backgroundColor: "#2d4de0" }}
+            >
+              {drawing ? "Tirage en cours…" : "🎰 Lancer le tirage au sort"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === "results" && (
+        <div className="max-w-xl flex flex-col gap-6">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-4">
+            <h2 className="font-semibold text-gray-900 text-lg">🎉 Résultats du tirage</h2>
+            <ul className="flex flex-col gap-3">
+              {winners.map((w, i) => (
+                <li key={w.prize.id} className="flex items-center gap-4 p-4 rounded-xl" style={{ backgroundColor: "#f4f6fb" }}>
+                  <span className="text-xl font-bold text-gray-200 w-8 text-center">{i + 1}</span>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900">{w.participant}</p>
+                    <p className="text-sm text-gray-500">{w.prize.label}</p>
+                  </div>
+                  <span className="text-xl">🏆</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={draw}
+              disabled={drawing}
+              className="flex-1 border py-3 rounded-xl font-semibold text-sm transition-colors disabled:opacity-40"
+              style={{ borderColor: "#2d4de0", color: "#2d4de0" }}
+            >
+              Tirer à nouveau
+            </button>
+            <button
+              onClick={reset}
+              className="flex-1 text-white py-3 rounded-xl font-semibold text-sm transition-colors"
+              style={{ backgroundColor: "#2d4de0" }}
+            >
+              Nouvelle tombola
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

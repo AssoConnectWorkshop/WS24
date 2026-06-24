@@ -24,57 +24,65 @@ async function testApi(): Promise<{ ok: boolean; platformName: string | null }> 
   }
 }
 
-function StatusIcon({ ok }: { ok: boolean }) {
+function StatusBadge({ ok }: { ok: boolean }) {
   return ok ? (
-    <span className="text-green-500 text-2xl">✓</span>
+    <span
+      className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+      style={{ backgroundColor: "#e6f9f2", color: "#00875a" }}
+    >
+      <span className="text-base leading-none">✓</span> Connecté
+    </span>
   ) : (
-    <span className="text-red-500 text-2xl">✗</span>
+    <span
+      className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+      style={{ backgroundColor: "#fef2f2", color: "#dc2626" }}
+    >
+      <span className="text-base leading-none">✗</span> Erreur
+    </span>
   );
 }
 
 export default async function Home() {
   const [db, api] = await Promise.all([testDatabase(), testApi()]);
-  const wsName = (await import("@/config/site")).siteConfig.name;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-10 p-8">
-      <div className="absolute top-4 left-4 text-sm font-bold bg-black text-white px-3 py-1 rounded-full">
-        {wsName}
-      </div>
-      <div className="flex flex-col items-center gap-4">
-        <Image src="/mascot.png" alt="Mascot" width={160} height={160} priority />
-        <h1 className="text-4xl font-bold">Padawan Delphine is ready</h1>
+    <main className="p-8">
+      <div className="mb-8 flex items-center gap-4">
+        <Image src="/mascot.png" alt="Mascot" width={48} height={48} priority className="rounded-full" />
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Padawan Delphine is ready</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Tableau de bord de l&apos;atelier</p>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-6 w-full max-w-md">
-        <div className="border rounded-xl p-6 flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <StatusIcon ok={db.ok} />
-            <h2 className="text-lg font-semibold">Test database connection</h2>
+      <div className="grid grid-cols-1 gap-4 max-w-2xl">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Base de données</p>
+            <p className="font-semibold text-gray-900">Connexion Supabase</p>
+            {db.ok && (
+              <p className="text-sm text-gray-500 mt-1">
+                {db.tables.length} table{db.tables.length > 1 ? "s" : ""}
+                {db.tables.length > 0 && (
+                  <span className="ml-1 opacity-70">
+                    ({db.tables.slice(0, 3).join(", ")}{db.tables.length > 3 ? "…" : ""})
+                  </span>
+                )}
+              </p>
+            )}
           </div>
-          {db.ok && (
-            <p className="text-sm text-gray-600">
-              Number of tables: {db.tables.length}
-              {db.tables.length > 0 && (
-                <span className="ml-1 opacity-60">
-                  ({db.tables.slice(0, 3).join(", ")}
-                  {db.tables.length > 3 ? "…" : ""})
-                </span>
-              )}
-            </p>
-          )}
+          <StatusBadge ok={db.ok} />
         </div>
 
-        <div className="border rounded-xl p-6 flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <StatusIcon ok={api.ok} />
-            <h2 className="text-lg font-semibold">Test API connection</h2>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">API</p>
+            <p className="font-semibold text-gray-900">Connexion AssoConnect</p>
+            {api.ok && api.platformName && (
+              <p className="text-sm text-gray-500 mt-1">{api.platformName}</p>
+            )}
           </div>
-          {api.ok && api.platformName && (
-            <p className="text-sm text-gray-600">
-              Name of the platform: <span className="font-medium">{api.platformName}</span>
-            </p>
-          )}
+          <StatusBadge ok={api.ok} />
         </div>
       </div>
     </main>
